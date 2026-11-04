@@ -210,6 +210,27 @@ img{max-width:100%;display:block}
 .filter::-webkit-scrollbar{display:none}
 .filter .chip{flex:none;--c:var(--sub)}
 .study-tags{font-size:12px;font-weight:700;color:var(--sub)}
+.badge{display:inline-block;font-size:11px;font-weight:700;line-height:18px;padding:0 7px;border-radius:6px;background:color-mix(in srgb,var(--soc) 18%,transparent);color:var(--soc);margin-left:6px;vertical-align:middle}
+.badge.book{background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok)}
+.thumbs{display:flex;gap:8px;flex-wrap:wrap;padding:0 16px 14px}
+.thumbs .th{position:relative}
+.thumbs img{width:76px;height:100px;object-fit:cover;border-radius:6px;border:1px solid var(--line);background:#fff}
+.thumbs button{position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;border:2px solid var(--surface);background:var(--ink);color:var(--bg);font-size:13px;line-height:1;padding:0}
+.ans-item{padding:16px;border-top:1px solid var(--line)}
+.ans-item:first-child{border-top:0}
+.ans-item.off{opacity:.55}
+.ans-head{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.ans-thumb{width:110px;height:70px;object-fit:contain;object-position:top left;background:#fff;border:1px solid var(--line);border-radius:4px;flex:none}
+.ans-head .grow{flex:1;min-width:0}
+.ans-item .label-sm{margin-top:10px}
+textarea.text-in{resize:vertical;min-height:80px;line-height:1.65;display:block}
+.warn{font-size:12.5px;color:var(--soc);margin-top:6px}
+.busy{padding:48px 24px;text-align:center;color:var(--ink2)}
+.busy b{display:block;color:var(--ink);font-size:17px;margin-bottom:6px}
+.spin{width:28px;height:28px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--sub);margin:0 auto 16px;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+.mini-ai{font-size:12px;font-weight:500;padding:5px 11px;margin-top:4px}
 .toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:12px;font-size:14px;font-weight:500;opacity:0;pointer-events:none;transition:.25s;z-index:20;max-width:calc(100% - 32px);text-align:center}
 .toast.on{opacity:1;transform:translateX(-50%)}
 .loading{display:grid;place-items:center;min-height:60vh;color:var(--ink3)}
@@ -223,6 +244,7 @@ img{max-width:100%;display:block}
 <input type="file" id="fileIn" accept="image/*" class="sr" tabindex="-1">
 <input type="file" id="ansIn" accept="image/*" class="sr" tabindex="-1">
 <input type="file" id="bkIn" accept="application/json,.json" class="sr" tabindex="-1">
+<input type="file" id="ansPageIn" accept="image/*" multiple class="sr" tabindex="-1">
 <script>
 (() => {
 "use strict";
@@ -240,6 +262,7 @@ const ICON = {
   plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
   x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M9 8h7M9 11.5h5"/></svg>',
   play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l10.5-6.5z"/></svg>',
 };
 
@@ -337,12 +360,73 @@ async function hydrateImages() {
 }
 
 /* ---------- settings ---------- */
-const MODEL = "claude-sonnet-5-5";
+const MODEL = "claude-sonnet-5-5";      // 範囲検出・解答冊子の読み取り
+const MODEL_THINK = "claude-opus-5-5";  // 解説の下書き・問題を解く
 const KEY_LS = "machigai-card:apikey";
 const getKey = () => { try { return localStorage.getItem(KEY_LS) || ""; } catch (e) { return ""; } };
 const setKey = v => { try { v ? localStorage.setItem(KEY_LS, v) : localStorage.removeItem(KEY_LS); } catch (e) {} };
 const blobToDataURL = b => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(b); });
 const dataURLToBlob = async u => (await fetch(u)).blob();
+
+/* ---------- AI helpers ---------- */
+async function callClaude(content, opts = {}) {
+  const key = getKey();
+  if (!key) { const e = new Error("nokey"); e.status = "nokey"; throw e; }
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+    body: JSON.stringify({ model: opts.model || MODEL, max_tokens: opts.maxTokens || 4000, messages: [{ role: "user", content }] }),
+  });
+  if (!res.ok) {
+    let msg = ""; try { const j = await res.json(); msg = (j.error && j.error.message) || ""; } catch (e) {}
+    const er = new Error(msg); er.status = res.status; throw er;
+  }
+  const j = await res.json();
+  return (j.content || []).filter(c => c.type === "text").map(c => c.text).join("");
+}
+function parseJSON(text) {
+  const a = text.indexOf("{"), b = text.lastIndexOf("}");
+  if (a < 0 || b <= a) throw new Error("json");
+  return JSON.parse(text.slice(a, b + 1));
+}
+async function imgPart(blob, max = 1600) {
+  const r = await resize(await loadBitmap(blob), max, 0.85);
+  return { type: "image", source: { type: "base64", media_type: "image/jpeg", data: (await blobToDataURL(r.blob)).split(",")[1] } };
+}
+function aiErrMsg(err) {
+  const st = err && err.status;
+  if (st === "nokey") return "設定でAPIキーを入れると使えます";
+  if (st === 401 || st === 403) return "APIキーが正しくないようです。設定で確かめてください";
+  if (st === 429 || st === 529) return "混み合っています。少し待ってからもう一度どうぞ";
+  if (/credit|billing/i.test(String(err && err.message))) return "APIの残高を確かめてください";
+  if (!navigator.onLine) return "オフラインです。電波のある場所でどうぞ";
+  return "うまく読み取れませんでした。もう一度お試しください";
+}
+async function aiExplain(card) {
+  const parts = [await imgPart(await Store.getBlob(card.imgId), 1400)];
+  const sub = subName(card.subject);
+  const prompt = card.answer
+    ? `画像は中学受験の過去問（教科：${sub}）の1問です。正解は「${card.answer}」です。
+小学5〜6年生が読んでわかる言葉で、この問題の解き方を説明してください。
+- 正解にたどりつく手順を、式や考え方とともに、300字以内で。
+- 最後に「まちがえやすい点：」として1文。
+- 正解は変えないでください。正解が問題と合わないと思ったら、check にその理由を短く書いてください（合っていれば空文字）。
+次の形のJSONだけを返してください：{"explanation":"…","check":""}`
+    : `画像は中学受験の過去問（教科：${sub}）の1問です。正解はわかっていません。
+この問題を解いて、正解と、小学5〜6年生が読んでわかる解き方を書いてください。
+- answer：正解を短く（記号問題は記号、数値は単位も、記述は解答例）。
+- explanation：手順を式や考え方とともに300字以内で。最後に「まちがえやすい点：」として1文。
+- confidence：自信の度合いを high / medium / low で。
+次の形のJSONだけを返してください：{"answer":"…","explanation":"…","confidence":"high"}`;
+  parts.push({ type: "text", text: prompt });
+  const data = parseJSON(await callClaude(parts, { model: MODEL_THINK, maxTokens: 3000 }));
+  return {
+    answer: card.answer ? null : String(data.answer || "").trim(),
+    explanation: String(data.explanation || "").trim(),
+    check: String(data.check || "").trim(),
+    lowConfidence: !card.answer && data.confidence && data.confidence !== "high",
+  };
+}
 
 /* ---------- tags ---------- */
 const TAGS_LS = "machigai-card:tags";
@@ -526,9 +610,10 @@ function vCard() {
   <div class="status-line"><span class="pill">${st}</span><span class="dots-wrap" style="margin:0">直近3回 ${dots(c)}</span></div>
   <div class="card-back">
     <div class="field"><div class="field-k">タグ</div>${tagBox("card", c.tags)}</div>
-    <div class="field"><div class="field-k">正解</div><input type="text" data-field="answer" value="${esc(c.answer)}" placeholder="答えを書く"></div>
+    <div class="field"><div class="field-k">正解${c.answerByAI ? '<span class="badge">AIの答え・確認してください</span>' : ""}</div><input type="text" data-field="answer" value="${esc(c.answer)}" placeholder="答えを書く"></div>
     <div class="field"><div class="field-k">ポイント</div><textarea data-field="point" rows="2" placeholder="自分用のメモ・気をつけること">${esc(c.point)}</textarea></div>
-    <div class="field"><div class="field-k">解説</div><textarea data-field="explain" rows="3" placeholder="解き方・解説">${esc(c.explain)}</textarea></div>
+    <div class="field"><div class="field-k">解説${c.explainByAI ? '<span class="badge">AIの下書き</span>' : ""}</div><textarea data-field="explain" rows="3" placeholder="解き方・解説">${esc(c.explain)}</textarea>
+      <button class="btn btn-ghost mini-ai" data-act="ai-explain" ${S.aiCard === c.id ? "disabled" : ""}>${ICON.spark}${S.aiCard === c.id ? "AIが書いています…" : c.explain ? "AIで解説を書き直す" : c.answer ? "AIで解説を下書き" : "AIで解いて下書き"}</button></div>
     <div class="field"><div class="field-k">解答・解説の写真</div>
       ${c.ansImgId ? `<img class="ansimg" data-blob="${c.ansImgId}" alt="解答の写真"><button class="btn btn-ghost" data-act="del-ans" style="padding:6px 12px;font-size:13px">写真を外す</button>` :
         `<button class="btn btn-ghost" data-act="add-ans" ${Store.canUpload() ? "" : "disabled"} style="padding:6px 12px;font-size:13px">${ICON.cam}写真を追加</button>`}
@@ -562,9 +647,9 @@ function vStudy() {
   if (!c) { st.i++; return vStudy(); }
   const p = pageOf(c);
   const back = st.flipped ? `<div class="card-back reveal">
-      <div class="field"><div class="field-k">正解</div><div class="field-v big ${c.answer ? "" : "muted"}">${c.answer ? esc(c.answer) : "未記入"}</div></div>
+      <div class="field"><div class="field-k">正解${c.answerByAI ? '<span class="badge">AIの答え</span>' : ""}</div><div class="field-v big ${c.answer ? "" : "muted"}">${c.answer ? esc(c.answer) : "未記入"}</div></div>
       ${c.point ? `<div class="field"><div class="field-k">ポイント</div><div class="field-v">${esc(c.point)}</div></div>` : ""}
-      ${c.explain ? `<div class="field"><div class="field-k">解説</div><div class="field-v">${esc(c.explain)}</div></div>` : ""}
+      ${c.explain ? `<div class="field"><div class="field-k">解説${c.explainByAI ? '<span class="badge">AIの下書き</span>' : ""}</div><div class="field-v">${esc(c.explain)}</div></div>` : ""}
       ${c.ansImgId ? `<img class="ansimg" data-blob="${c.ansImgId}" alt="解答の写真">` : ""}
       <button class="btn btn-ghost" data-act="open-card" data-id="${c.id}" style="padding:4px 12px;font-size:13px;margin-top:6px">書き込む・直す</button>
     </div>` : "";
@@ -604,6 +689,7 @@ function vEdit() {
   return `${topbar(e.pageId ? "ページを編集" : "過去問を追加")}<div style="--sub:var(--${sub})">${meta}
   <div class="toolbar">
     <button class="btn" data-act="ai" ${e.ai ? "disabled" : ""}>${ICON.spark}${e.ai ? "AIが読み取り中…" : "AIで問題を見つける"}</button>
+    ${e.pageId && e.boxes.some(b => b.cardId) ? `<button class="btn" data-act="ans-open">${ICON.book}解答ページから読み取る</button>` : ""}
     <button class="btn" data-act="add-mode" aria-pressed="${!!e.adding}">${ICON.plus}${e.adding ? "画像をなぞって囲む" : "範囲を追加"}</button>
   </div>
   <p class="hint">${e.ai ? "1ページで30秒ほどかかります。結果はあとから直せます。" : e.adding ? "問題の左上から右下へ指でなぞってください。" : "範囲をタップで選び、ドラッグで移動、右下の丸で大きさを変えられます。まちがえた問題に「復習する」を付けてください。"}</p>
@@ -612,6 +698,48 @@ function vEdit() {
   ${e.pageId ? `<div class="detail-actions"><button class="btn btn-danger" data-act="del-page">このページを削除</button></div>` : ""}
   <div class="fab-bar"><div class="inner"><button class="btn btn-primary" data-act="save-page" ${e.saving || !e.boxes.length ? "disabled" : ""}>${e.saving ? `保存中… ${e.progress || ""}` : `保存する（${e.boxes.length}問・復習${nRv}）`}</button></div></div>
   </div>`;
+}
+
+function vAnswers() {
+  const A = S.ans, p = S.pages.find(x => x.id === A.pageId);
+  const sub = p ? p.subject : S.subject;
+  const head = topbar("解答ページから読み取る");
+  if (A.step === "busy") {
+    return `${head}<div style="--sub:var(--${sub})"><div class="sheet round" style="margin-top:8px"><div class="busy"><div class="spin"></div><b>${esc(A.msg || "読み取り中…")}</b>${esc(A.sub || "")}</div></div></div>`;
+  }
+  if (A.step === "pick") {
+    const thumbs = A.imgs.map((im, i) => `<div class="th"><img src="${esc(im.url)}" alt="解答ページ${i + 1}"><button data-act="ans-rmimg" data-i="${i}" aria-label="外す">×</button></div>`).join("");
+    const n = S.cards.filter(c => c.pageId === A.pageId).length;
+    return `${head}<div style="--sub:var(--${sub})">
+    <p class="hint" style="padding-top:4px">「${esc(p ? p.title : "")}」の${n}問に正解を入れます。解答・解説のページを撮影してください（4枚まで）。</p>
+    ${A.imgs.length ? `<div class="thumbs">${thumbs}</div>` : ""}
+    ${A.imgs.length < 4 ? `<label class="picker" for="ansPageIn" style="padding:28px 20px">${ICON.cam}<b>${A.imgs.length ? "もう1枚追加" : "解答ページを撮る・選ぶ"}</b>解答と解説が写るように</label>` : ""}
+    <div class="sheet round" style="margin-top:14px"><section class="drawer">
+      <div class="drawer-head"><div><div class="drawer-name" style="font-size:15px">解説がない問題はAIが下書きする</div>
+      <div class="drawer-sub">正解をもとに、小学生向けの解き方を書きます。下書きなので内容を確かめてください。</div></div>
+      <button class="tog" style="margin-left:auto;align-self:center" aria-pressed="${A.gen}" data-act="ans-gen">${A.gen ? "する" : "しない"}</button></div>
+    </section></div>
+    <div class="fab-bar"><div class="inner"><button class="btn btn-primary" data-act="ans-run" ${A.imgs.length ? "" : "disabled"}>${ICON.spark}読み取る</button></div></div></div>`;
+  }
+  // review
+  const items = A.items.map((it, i) => {
+    const c = S.cards.find(x => x.id === it.cardId); if (!c) return "";
+    return `<div class="ans-item ${it.use ? "" : "off"}">
+      <div class="ans-head"><img class="ans-thumb" data-blob="${c.imgId}" alt=""><div class="grow"><div style="font-weight:700">${esc(c.label || "問題")}</div>
+        ${c.answer ? `<div class="drawer-sub">今の正解：${esc(c.answer)}</div>` : ""}</div>
+        <button class="tog" aria-pressed="${it.use}" data-act="ans-use" data-i="${i}">${it.use ? "反映する" : "反映しない"}</button></div>
+      <span class="label-sm">正解${it.answer ? '<span class="badge book">解答冊子から</span>' : ""}</span>
+      <input class="text-in" type="text" data-ans="${i}" data-k="answer" value="${esc(it.answer)}" placeholder="見つかりませんでした。手で入力できます">
+      <span class="label-sm">解説${it.explain ? (it.explainAI ? '<span class="badge">AIの下書き・確認してください</span>' : '<span class="badge book">解答冊子から</span>') : ""}</span>
+      <textarea class="text-in" data-ans="${i}" data-k="explain" rows="4" placeholder="解説なし">${esc(it.explain)}</textarea>
+      ${it.check ? `<p class="warn">AIからの確認：${esc(it.check)}</p>` : ""}
+    </div>`;
+  }).join("");
+  const n = A.items.filter(it => it.use).length;
+  return `${head}<div style="--sub:var(--${sub})">
+  <p class="hint" style="padding-top:4px">内容を確かめて、直すところがあれば書き換えてから反映してください。</p>
+  <div class="sheet round">${items || '<div class="empty"><b>正解を見つけられませんでした</b>解答ページが写っているか確かめてください</div>'}</div>
+  <div class="fab-bar"><div class="inner"><button class="btn btn-primary" data-act="ans-apply" ${n ? "" : "disabled"}>選んだ${n}問に反映する</button></div></div></div>`;
 }
 
 function vSettings() {
@@ -642,7 +770,7 @@ function render() {
   if (S.view === "loading") return;
   if (S.view === "error") { $app.innerHTML = `<div class="loading"><div style="text-align:center">データを読み込めませんでした。<br>ページを開き直してください。</div></div>`; return; }
   document.documentElement.style.setProperty("--sub", `var(--${S.subject})`);
-  const v = { home: vHome, pages: vPages, box: vBox, card: vCard, study: vStudy, edit: vEdit, settings: vSettings }[S.view] || vHome;
+  const v = { home: vHome, pages: vPages, box: vBox, card: vCard, study: vStudy, edit: vEdit, settings: vSettings, answers: vAnswers }[S.view] || vHome;
   $app.innerHTML = v();
   document.querySelectorAll("textarea").forEach(t => { t.style.height = "auto"; t.style.height = t.scrollHeight + "px"; });
   hydrateImages();
@@ -876,6 +1004,94 @@ document.getElementById("ansIn").addEventListener("change", async ev => {
   } catch (e) { toast("写真を追加できませんでした"); }
 });
 
+/* ---------- answers from booklet ---------- */
+function openAnswers() {
+  const e = S.edit;
+  if (e.dirty) { toast("先に「保存する」を押してから読み取ってください"); return; }
+  if (!getKey()) { toast("設定でAPIキーを入れると使えます"); return; }
+  S.ans = { pageId: e.pageId, step: "pick", imgs: [], gen: true, items: [] };
+  nav("answers");
+}
+document.getElementById("ansPageIn").addEventListener("change", async ev => {
+  const files = [...(ev.target.files || [])]; ev.target.value = "";
+  if (!S.ans) return;
+  for (const f of files) {
+    if (S.ans.imgs.length >= 4) break;
+    try { const r = await resize(await loadBitmap(f), 2000, 0.85); S.ans.imgs.push({ blob: r.blob, url: URL.createObjectURL(r.blob) }); }
+    catch (e) { toast("画像を読み込めませんでした"); }
+  }
+  render();
+});
+async function runAnswers() {
+  const A = S.ans, page = S.pages.find(p => p.id === A.pageId); if (!page) return;
+  const cards = S.cards.filter(c => c.pageId === page.id).sort((a, b) => (a.box.y - b.box.y) || (a.box.x - b.box.x));
+  A.step = "busy"; A.msg = "解答ページを読み取り中…"; A.sub = "1分ほどかかります"; render();
+  try {
+    const parts = [await imgPart(await Store.getBlob(page.imgId))];
+    for (const im of A.imgs) parts.push(await imgPart(im.blob));
+    const list = cards.map((c, i) => `${i + 1}. ${c.label || "（名前なし）"}`).join("\n");
+    parts.push({ type: "text", text: `1枚目は中学受験の過去問（教科：${subName(page.subject)}、「${page.title}」）の問題ページです。2枚目以降は、その過去問の解答・解説ページです。
+問題ページから作ったカードの一覧（ページの上から順）：
+${list}
+解答・解説ページから、各カードの正解を探してください。番号 no は一覧の番号です。1枚目の問題ページを見て、どの問題がどのカードかを判断してください。
+- answer：解答ページに書かれた正解をそのまま短く（記号問題は記号、数値は単位も、記述問題は解答例）。
+- explanation：解答・解説ページにその問題の解説が書かれていれば、その要点を300字以内で。書かれていなければ空文字。自分で解説を作らないでください。
+- 正解が見つからない問題は answer を空文字にしてください。推測で埋めないでください。
+次の形のJSONだけを返してください：
+{"answers":[{"no":1,"answer":"","explanation":""}]}` });
+    const data = parseJSON(await callClaude(parts, { model: MODEL, maxTokens: 6000 }));
+    const got = {};
+    (Array.isArray(data.answers) ? data.answers : []).forEach(a => { const n = Number(a && a.no); if (n >= 1 && n <= cards.length) got[n - 1] = a; });
+    A.items = cards.map((c, i) => {
+      const a = got[i] || {};
+      const answer = String(a.answer || "").trim(), explain = String(a.explanation || "").trim();
+      return { cardId: c.id, answer, explain, explainAI: false, check: "", use: !!(answer || explain) && !(c.answer && c.explain) };
+    });
+    if (A.gen) {
+      const todo = A.items.filter(it => it.answer && !it.explain);
+      let k = 0;
+      for (const it of todo) {
+        A.msg = "AIが解説を下書き中…"; A.sub = `${++k} / ${todo.length}`; render();
+        const c = S.cards.find(x => x.id === it.cardId);
+        try { const r = await aiExplain({ ...c, answer: it.answer }); it.explain = r.explanation; it.explainAI = !!r.explanation; it.check = r.check; it.use = true; }
+        catch (err) { if (err.status === 401 || err.status === 403) throw err; }
+      }
+    }
+    A.step = "review"; render();
+  } catch (err) {
+    A.step = "pick"; render(); toast(aiErrMsg(err));
+  }
+}
+async function applyAnswers() {
+  const A = S.ans; let n = 0;
+  for (const it of A.items) {
+    if (!it.use) continue;
+    const c = S.cards.find(x => x.id === it.cardId); if (!c) continue;
+    const patch = {};
+    if (it.answer.trim()) { patch.answer = it.answer.trim(); patch.answerByAI = false; }
+    if (it.explain.trim()) { patch.explain = it.explain.trim(); patch.explainByAI = !!it.explainAI; }
+    if (Object.keys(patch).length) { await saveCard(c, patch); n++; }
+  }
+  A.imgs.forEach(im => URL.revokeObjectURL(im.url));
+  S.ans = null; toast(`${n}問に反映しました`); back();
+}
+async function explainCard() {
+  const c = S.cards.find(x => x.id === S.cardId); if (!c || S.aiCard) return;
+  if (!getKey()) { toast("設定でAPIキーを入れると使えます"); return; }
+  if (!c.answer && !confirm("正解が未記入なので、AIが問題を解いて答えと解説を下書きします。まちがえることがあるので、必ず確かめてください。")) return;
+  if (c.explain && !confirm("今の解説をAIの下書きで置き換えます。")) return;
+  S.aiCard = c.id; render();
+  try {
+    const r = await aiExplain(c);
+    const patch = {};
+    if (r.answer) { patch.answer = r.answer; patch.answerByAI = true; }
+    if (r.explanation) { patch.explain = r.explanation + (r.check ? `\n（AIからの確認：${r.check}）` : ""); patch.explainByAI = true; }
+    await saveCard(S.cards.find(x => x.id === c.id), patch);
+    toast(r.lowConfidence ? "下書きしました。AIの自信が低いので特によく確かめてください" : r.check ? "下書きしました。AIからの確認があります" : "下書きしました。内容を確かめてください");
+  } catch (err) { toast(aiErrMsg(err)); }
+  S.aiCard = null; if (S.view === "card") render();
+}
+
 /* ---------- backup ---------- */
 async function exportBackup() {
   toast("書き出し中…");
@@ -957,6 +1173,13 @@ $app.addEventListener("click", async ev => {
     case "edit-sub": e.subject = t.dataset.sub; e.dirty = true; render(); break;
     case "add-mode": e.adding = !e.adding; e.selected = null; render(); break;
     case "ai": runAI(); break;
+    case "ans-open": openAnswers(); break;
+    case "ans-rmimg": { const im = S.ans.imgs.splice(Number(t.dataset.i), 1)[0]; if (im) URL.revokeObjectURL(im.url); render(); break; }
+    case "ans-gen": S.ans.gen = !S.ans.gen; render(); break;
+    case "ans-run": runAnswers(); break;
+    case "ans-use": { const it = S.ans.items[Number(t.dataset.i)]; it.use = !it.use; render(); break; }
+    case "ans-apply": applyAnswers(); break;
+    case "ai-explain": explainCard(); break;
     case "sel-box": if (drag) return; if (e.adding) return; e.selected = t.dataset.id; render(); break;
     case "sel-row": if (e.selected !== t.dataset.id) { e.selected = t.dataset.id; const el = document.querySelector(`.box[data-id="${t.dataset.id}"]`); document.querySelectorAll(".box.sel,.boxrow.sel").forEach(x => x.classList.remove("sel")); if (el) { el.classList.add("sel"); } t.closest(".boxrow").classList.add("sel"); } break;
     case "tog-review": { const b = e.boxes.find(x => x.id === t.dataset.id); b.review = !b.review; e.dirty = true; render(); break; }
@@ -991,6 +1214,7 @@ $app.addEventListener("input", ev => {
     const b = S.edit.boxes.find(x => x.id === t.dataset.boxlabel); if (b) { b.label = t.value; S.edit.dirty = true; }
     const tag = document.querySelector(`.box[data-id="${t.dataset.boxlabel}"] .tag`); if (tag) tag.textContent = t.value;
   }
+  if (t.dataset.ans && S.ans) { const it = S.ans.items[Number(t.dataset.ans)]; if (it) { it[t.dataset.k] = t.value; if (t.dataset.k === "explain") it.explainAI = it.explainAI && !!t.value; } }
   if (t.dataset.tagin) {
     if (/[、,，]/.test(t.value) && !ev.isComposing) { addTags(t.dataset.tagin, t.value, true); return; }
     fillSugg(t);
@@ -1013,7 +1237,13 @@ document.addEventListener("pointerdown", ev => { if (ev.target.closest && ev.tar
 $app.addEventListener("change", ev => {
   const t = ev.target;
   if (t.dataset.field && S.view === "card") {
-    const c = S.cards.find(x => x.id === S.cardId); if (c && c[t.dataset.field] !== t.value) saveCard(c, { [t.dataset.field]: t.value });
+    const c = S.cards.find(x => x.id === S.cardId);
+    if (c && c[t.dataset.field] !== t.value) {
+      const patch = { [t.dataset.field]: t.value };
+      if (t.dataset.field === "answer") patch.answerByAI = false;
+      if (t.dataset.field === "explain") patch.explainByAI = false;
+      saveCard(c, patch).then(() => { if (S.view === "card") { const k = t.closest(".field").querySelector(".badge"); if (k) k.remove(); } });
+    }
   }
 });
 
