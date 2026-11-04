@@ -1,6 +1,6 @@
 // まちがいカード service worker
 // アプリを更新したら、この番号を上げてください（例: v2）
-const CACHE = "machigai-card-v3";
+const CACHE = "machigai-card-v4";
 const SHELL = [
   "./",
   "./index.html",
